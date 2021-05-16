@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/woody-32.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/woody-16.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,400,400italic,700,700italic|Noto Serif:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":26,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Boosting (梯度提升)相較對於 bagging 是以多個強分類器 (Strong Classifier) 組合不同，boosting 方法是藉由多個弱分類器 (Weak Classifier) 組合成為一個強分類器。 其中弱分類器的 error rate 需要略低於 50%，透過 ensemble 來使分類準確度逐步趨近於1。 其中訓練 boosting clf. 的方法是    建構第一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[ML] Ensemble - Boosting, Stacking">
+<meta property="og:url" content="http://example.com/2020/09/28/ml-ensemble/index.html">
+<meta property="og:site_name" content="Sean talks">
+<meta property="og:description" content="Boosting (梯度提升)相較對於 bagging 是以多個強分類器 (Strong Classifier) 組合不同，boosting 方法是藉由多個弱分類器 (Weak Classifier) 組合成為一個強分類器。 其中弱分類器的 error rate 需要略低於 50%，透過 ensemble 來使分類準確度逐步趨近於1。 其中訓練 boosting clf. 的方法是    建構第一">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://i.imgur.com/udUaER1.jpg">
+<meta property="og:image" content="https://i.imgur.com/9UXyGZD.jpg">
+<meta property="og:image" content="https://i.imgur.com/W5AxFrw.jpg">
+<meta property="og:image" content="https://i.imgur.com/2LZR2ME.jpg">
+<meta property="og:image" content="https://i.imgur.com/XpCX9de.png">
+<meta property="article:published_time" content="2020-09-27T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-05-16T09:14:14.162Z">
+<meta property="article:author" content="Sean Chen">
+<meta property="article:tag" content="Machine Learning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.imgur.com/udUaER1.jpg">
+
+<link rel="canonical" href="http://example.com/2020/09/28/ml-ensemble/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>[ML] Ensemble - Boosting, Stacking | Sean talks</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Sean talks</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Attitude is everything</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/n60512" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/09/28/ml-ensemble/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.jpg">
+      <meta itemprop="name" content="Sean Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sean talks">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [ML] Ensemble - Boosting, Stacking
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-09-28 00:00:00" itemprop="dateCreated datePublished" datetime="2020-09-28T00:00:00+08:00">2020-09-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-05-16 17:14:14" itemprop="dateModified" datetime="2021-05-16T17:14:14+08:00">2021-05-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index"><span itemprop="name">Machine Learning</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/Note/" itemprop="url" rel="index"><span itemprop="name">Note</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Boosting-梯度提升"><a href="#Boosting-梯度提升" class="headerlink" title="Boosting (梯度提升)"></a>Boosting (梯度提升)</h2><p>相較對於 bagging 是以多個強分類器 (Strong Classifier) 組合不同，boosting 方法是藉由多個弱分類器 (Weak Classifier) 組合成為一個強分類器。</p>
+<p>其中弱分類器的 error rate 需要略低於 50%，透過 ensemble 來使分類準確度逐步趨近於1。</p>
+<p>其中訓練 boosting clf. 的方法是</p>
+<ul>
+<li>  建構第一個分類器 $f_{1}(x)$</li>
+<li>建構第二個分類器 $f_{2}(x)$ 以幫助 $f_{1}(x)$ 預測分類<ul>
+<li>  若 $f_{2}(x)$ 相似於 $f_{1}(x)$ 會沒有效果</li>
+</ul>
+</li>
+<li>  建構第 N 個分類器 …</li>
+<li>  因此 boosting clf. 是具時序性的。</li>
+</ul>
+<p>其中， boosting 的模型特性能夠有效<strong>降低 bias</strong>。</p>
+<h3 id="AdaBoost"><a href="#AdaBoost" class="headerlink" title="AdaBoost"></a><a href="#AdaBoost" title="AdaBoost"></a>AdaBoost</h3><h4 id="如何建構不同的-Classifier"><a href="#如何建構不同的-Classifier" class="headerlink" title="如何建構不同的 Classifier"></a><a href="#%E5%A6%82%E4%BD%95%E5%BB%BA%E6%A7%8B%E4%B8%8D%E5%90%8C%E7%9A%84-Classifier" title="如何建構不同的 Classifier"></a>如何建構不同的 Classifier</h4><p>如果在訓練新的的分類器時，使用與舊有分類器相同的 datasets ，錯誤分類的資料還是容易做出錯誤分類，因此 AdaBoost 的作法是透過隊訓練資料做 re-weighting ，使得新的分類器能針對學習錯誤分類的資料以得到更好的效果。</p>
+<span id="more"></span>
+
+<p><strong>AdaBoost 演算法如下：</strong><br><img src="https://i.imgur.com/udUaER1.jpg" alt="note1"><br><img src="https://i.imgur.com/9UXyGZD.jpg" alt="note2"></p>
+<blockquote>
+<p>由於 boosting 訓練時著重在分類錯誤的資料，因此對於資料的 noise 十分敏感，因此不適用在 noise 多的資料中進行分類。</p>
+</blockquote>
+<p>使用 AdaBoost 弔詭的是當 training error 達到 0 時， testing error 卻仍持續下降。</p>
+<p>$g(x)$ 表示 weak clf. 整合的輸出結果，而 Margin 代表分類器分類正確的情形， 大於 0 代表正確分類，小於 0 則表示錯誤分類。</p>
+<p><img src="https://i.imgur.com/W5AxFrw.jpg" alt="note3"></p>
+<p>其中若使 Margin 愈大，則 penalty 則越小。</p>
+<p><img src="https://i.imgur.com/2LZR2ME.jpg" alt="note4"></p>
+<h3 id="Optimize"><a href="#Optimize" class="headerlink" title="Optimize"></a>Optimize</h3><p>Minimize $L(g) = \sum_n l(\hat{y}^n, g(x^n)) $</p>
+<h3 id="Gradient-Boosting"><a href="#Gradient-Boosting" class="headerlink" title="Gradient Boosting"></a>Gradient Boosting</h3><p>Gradient Descent 的計算如：<br>$y=F−∂L/∂F$</p>
+<p>欲使 $g_{t-1}(x)$<br>之 weak clf. 更新使其欲接近 g(t)，因此可這樣更新：<br>$g_t(x) = g_{t-1}(x)-η ∂L(g)/∂g(x)$</p>
+<blockquote>
+<p>ppt.ensemble.page.36-39</p>
+</blockquote>
+<h2 id="Stacking-Stacked-Generalization"><a href="#Stacking-Stacked-Generalization" class="headerlink" title="Stacking (Stacked Generalization)"></a>Stacking (Stacked Generalization)</h2><p><img src="https://i.imgur.com/XpCX9de.png" alt="stacking"></p>
+<p>一般 ensemble(bagging/boosting) 的 aggregation 方法會使用 (voting/averaging) 來實現。</p>
+<p>Stacking 又稱為 Stacked Generalization，是透過建構 meta-learner，將訓練好 n 個 base-learner 的輸出結果作為輸入，學習各 model 的權重，輸出預測結果。<br>而通常這個 meta-learner 會使用較為簡單的分類模型，如 Logistic regression。</p>
+<blockquote>
+<p>其中 Stacking 可以來實現 Bagging方式， 也可以來實現Boosting方式。</p>
+</blockquote>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li>  <a target="_blank" rel="noopener" href="http://speech.ee.ntu.edu.tw/~tlkagk/index.html">http://speech.ee.ntu.edu.tw/~tlkagk/index.html</a></li>
+<li>  <a target="_blank" rel="noopener" href="https://www.youtube.com/channel/UC2ggjtuuWvxrHHHiaDH1dlQ">https://www.youtube.com/channel/UC2ggjtuuWvxrHHHiaDH1dlQ</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/09/07/transformer-part1/" rel="prev" title="Attention Is All You Need (part 1)">
+      <i class="fa fa-chevron-left"></i> Attention Is All You Need (part 1)
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/05/Trie/" rel="next" title="Trie">
+      Trie <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Boosting-%E6%A2%AF%E5%BA%A6%E6%8F%90%E5%8D%87"><span class="nav-number">1.</span> <span class="nav-text">Boosting (梯度提升)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AdaBoost"><span class="nav-number">1.1.</span> <span class="nav-text">AdaBoost</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%BB%BA%E6%A7%8B%E4%B8%8D%E5%90%8C%E7%9A%84-Classifier"><span class="nav-number">1.1.1.</span> <span class="nav-text">如何建構不同的 Classifier</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Optimize"><span class="nav-number">1.2.</span> <span class="nav-text">Optimize</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gradient-Boosting"><span class="nav-number">1.3.</span> <span class="nav-text">Gradient Boosting</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Stacking-Stacked-Generalization"><span class="nav-number">2.</span> <span class="nav-text">Stacking (Stacked Generalization)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">3.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Sean Chen"
+      src="/images/head.jpg">
+  <p class="site-author-name" itemprop="name">Sean Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/n60512" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;n60512" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:n60512@gmail.com" title="E-Mail → mailto:n60512@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/profile.php?id=100000123574307" title="FB Page → https:&#x2F;&#x2F;www.facebook.com&#x2F;profile.php?id&#x3D;100000123574307" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>FB Page</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Sean Chen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

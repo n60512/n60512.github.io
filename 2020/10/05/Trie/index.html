@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/woody-32.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/woody-16.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,400,400italic,700,700italic|Noto Serif:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":26,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Trie ，又可稱為字典樹、前綴樹 (Prefix Tree) Trie 結構特性   hash tree 的變種，常用在搜尋系統中   空間換取時間，利用字串的共同前綴詞 (commen prefix) 作為儲存依據，以字母作為結點，降低查詢時間的開銷以達到提高效率之目的。   樹的高度為最長字串長 + 1   時間複雜度為 O(m), m 為欲插入&#x2F;搜尋的字串長度">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Trie">
+<meta property="og:url" content="http://example.com/2020/10/05/Trie/index.html">
+<meta property="og:site_name" content="Sean talks">
+<meta property="og:description" content="Trie ，又可稱為字典樹、前綴樹 (Prefix Tree) Trie 結構特性   hash tree 的變種，常用在搜尋系統中   空間換取時間，利用字串的共同前綴詞 (commen prefix) 作為儲存依據，以字母作為結點，降低查詢時間的開銷以達到提高效率之目的。   樹的高度為最長字串長 + 1   時間複雜度為 O(m), m 為欲插入&#x2F;搜尋的字串長度">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://i.imgur.com/pQpPR0x.png">
+<meta property="article:published_time" content="2020-10-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-05-16T10:20:07.998Z">
+<meta property="article:author" content="Sean Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.imgur.com/pQpPR0x.png">
+
+<link rel="canonical" href="http://example.com/2020/10/05/Trie/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Trie | Sean talks</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Sean talks</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Attitude is everything</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/n60512" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/05/Trie/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.jpg">
+      <meta itemprop="name" content="Sean Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sean talks">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Trie
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-10-05 00:00:00" itemprop="dateCreated datePublished" datetime="2020-10-05T00:00:00+08:00">2020-10-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-05-16 18:20:07" itemprop="dateModified" datetime="2021-05-16T18:20:07+08:00">2021-05-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Data-Structure/" itemprop="url" rel="index"><span itemprop="name">Data Structure</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><em>Trie ，又可稱為字典樹、前綴樹 (Prefix Tree)</em></p>
+<h2 id="Trie-結構特性"><a href="#Trie-結構特性" class="headerlink" title="Trie 結構特性"></a>Trie 結構特性</h2><ul>
+<li>  hash tree 的變種，常用在搜尋系統中</li>
+<li>  空間換取時間，利用字串的共同前綴詞 (commen prefix) 作為儲存依據，以字母作為結點，降低查詢時間的開銷以達到提高效率之目的。</li>
+<li>  樹的高度為最長字串長 + 1</li>
+<li>  時間複雜度為 O(m), m 為欲插入/搜尋的字串長度</li>
+</ul>
+<p><img src="https://i.imgur.com/pQpPR0x.png" alt="trie"></p>
+<span id="more"></span>
+
+<p>優點 ：</p>
+<ul>
+<li>  大幅減少無謂的字串比對，查詢效率比 hash map 高</li>
+<li>  容易撰寫</li>
+<li>  查詢是否存在 &amp; 前綴相關具有非常好的效果</li>
+</ul>
+<p>缺點：</p>
+<ul>
+<li>  十分消耗記憶體空間，因為需要存取與前綴相關的指標，因此大部分使用情況會占用大量空指標</li>
+</ul>
+<h2 id="Hash-vs-Trie"><a href="#Hash-vs-Trie" class="headerlink" title="Hash vs Trie"></a>Hash vs Trie</h2><table>
+<thead>
+<tr>
+<th>Compare</th>
+<th>Hash</th>
+<th>Trie</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>時間複雜度</td>
+<td>O(1)~O(n)</td>
+<td>O(n)</td>
+</tr>
+<tr>
+<td>空間複雜度</td>
+<td>優</td>
+<td>劣</td>
+</tr>
+<tr>
+<td>性質</td>
+<td>只能找尋完整字符</td>
+<td>除完整字符，也可找尋StarWith 前綴字符</td>
+</tr>
+</tbody></table>
+<p>若使 Hash 得以搜尋每個前綴字符，空間複雜度將比 Trie 來得低 (Trie還必須存取前綴相連的指標)。</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/245878/how-do-i-choose-between-a-hash-table-and-a-trie-prefix-tree">https://stackoverflow.com/questions/245878/how-do-i-choose-between-a-hash-table-and-a-trie-prefix-tree</a></p>
+<p><a target="_blank" rel="noopener" href="http://pisces.ck.tp.edu.tw/~peng/index.php?action=showfile&file=f743c2923f8170798f62a585257fdd8436cd73b6d">http://pisces.ck.tp.edu.tw/~peng/index.php?action=showfile&amp;file=f743c2923f8170798f62a585257fdd8436cd73b6d</a></p>
+<p><a target="_blank" rel="noopener" href="https://medium.com/@derekfan/%E4%B9%9D%E7%AB%A0%E7%AE%97%E6%B3%95-template-trie-tree-%E5%AD%97%E5%85%B8%E6%A8%B9-132e19c6c827">https://medium.com/@derekfan/九章算法-template-trie-tree-字典樹-132e19c6c827</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhu45.org/posts/2018/Jun/02/trie/">https://zhu45.org/posts/2018/Jun/02/trie/</a></p>
+<p><a target="_blank" rel="noopener" href="http://pisces.ck.tp.edu.tw/~peng/index.php?action=showfile&file=f743c2923f8170798f62a585257fdd8436cd73b6d">http://pisces.ck.tp.edu.tw/~peng/index.php?action=showfile&amp;file=f743c2923f8170798f62a585257fdd8436cd73b6d</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/09/28/ml-ensemble/" rel="prev" title="[ML] Ensemble - Boosting, Stacking">
+      <i class="fa fa-chevron-left"></i> [ML] Ensemble - Boosting, Stacking
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/24/the-ride-of-a-lifetime/" rel="next" title="[Note] 我生命中的一段歷險 | The Ride of A Lifetime (Robert Iger)">
+      [Note] 我生命中的一段歷險 | The Ride of A Lifetime (Robert Iger) <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Trie-%E7%B5%90%E6%A7%8B%E7%89%B9%E6%80%A7"><span class="nav-number">1.</span> <span class="nav-text">Trie 結構特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hash-vs-Trie"><span class="nav-number">2.</span> <span class="nav-text">Hash vs Trie</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">3.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Sean Chen"
+      src="/images/head.jpg">
+  <p class="site-author-name" itemprop="name">Sean Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/n60512" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;n60512" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:n60512@gmail.com" title="E-Mail → mailto:n60512@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/profile.php?id=100000123574307" title="FB Page → https:&#x2F;&#x2F;www.facebook.com&#x2F;profile.php?id&#x3D;100000123574307" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>FB Page</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Sean Chen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

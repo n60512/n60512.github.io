@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/woody-32.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/woody-16.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,400,400italic,700,700italic|Noto Serif:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":26,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="[Note] Kubernetes最近因工作需求必須稍微弄懂 kubernetes 在做些什麼，因此筆記起來一些基礎的使用與常用語法和遇過的坑。但要深究細節的話還是得參照官方 doc. : https:&#x2F;&#x2F;kubernetes.io&#x2F;  what’s kubernetes?Kubernetes 提供自動化部署及管理 container 的服務，以協助管理微服務（microservices）系統。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Note] Kubernetes">
+<meta property="og:url" content="http://example.com/2021/05/02/kubernetes-note-001/index.html">
+<meta property="og:site_name" content="Sean talks">
+<meta property="og:description" content="[Note] Kubernetes最近因工作需求必須稍微弄懂 kubernetes 在做些什麼，因此筆記起來一些基礎的使用與常用語法和遇過的坑。但要深究細節的話還是得參照官方 doc. : https:&#x2F;&#x2F;kubernetes.io&#x2F;  what’s kubernetes?Kubernetes 提供自動化部署及管理 container 的服務，以協助管理微服務（microservices）系統。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-05-02T13:27:29.000Z">
+<meta property="article:modified_time" content="2021-05-16T13:38:02.924Z">
+<meta property="article:author" content="Sean Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2021/05/02/kubernetes-note-001/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>[Note] Kubernetes | Sean talks</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Sean talks</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Attitude is everything</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/n60512" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/02/kubernetes-note-001/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.jpg">
+      <meta itemprop="name" content="Sean Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sean talks">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Note] Kubernetes
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2021-05-02 21:27:29" itemprop="dateCreated datePublished" datetime="2021-05-02T21:27:29+08:00">2021-05-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-05-16 21:38:02" itemprop="dateModified" datetime="2021-05-16T21:38:02+08:00">2021-05-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Cloud-Computing/" itemprop="url" rel="index"><span itemprop="name">Cloud Computing</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Cloud-Computing/GCP/" itemprop="url" rel="index"><span itemprop="name">GCP</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Note-Kubernetes"><a href="#Note-Kubernetes" class="headerlink" title="[Note] Kubernetes"></a>[Note] Kubernetes</h1><p>最近因工作需求必須稍微弄懂 kubernetes 在做些什麼，<br>因此筆記起來一些基礎的使用與常用語法和遇過的坑。<br>但要深究細節的話還是得參照官方 doc. : <a target="_blank" rel="noopener" href="https://kubernetes.io/">https://kubernetes.io/</a> </p>
+<h2 id="what’s-kubernetes"><a href="#what’s-kubernetes" class="headerlink" title="what’s kubernetes?"></a>what’s kubernetes?</h2><p>Kubernetes 提供自動化部署及管理 container 的服務，<br>以協助管理微服務（microservices）系統。</p>
+<p>使用 kubernetes 可以提供以下功能：</p>
+<ul>
+<li>容器的部署（Deployment）至一或多台機器</li>
+<li>工作負載自動化擴展（Scaling）</li>
+<li>自動化偵測並重啟故障容器（Management），確保系統持續提供服務 </li>
+</ul>
+<h2 id="Component-of-Kubernetes"><a href="#Component-of-Kubernetes" class="headerlink" title="Component of Kubernetes"></a>Component of Kubernetes</h2><p>kubernetes 組成元件由小至大分別為 Pod, Worker Node, Master Node</p>
+<h3 id="Pod"><a href="#Pod" class="headerlink" title="Pod"></a>Pod</h3><p>Pod 為 kubernetes 運作的最小單位，一個 Pod 對應到一個 Application (e.g. API Server/data transform service)，而當多個 Containers 存在於同一個 Pod 時，這些 Containers 會共享資源及網路，以 yaml 定義並部署建立。</p>
+<span id="more"></span>
+
+<h3 id="Worker-Node"><a href="#Worker-Node" class="headerlink" title="Worker Node"></a>Worker Node</h3><p>Worker Node 是 kubernetes 中最小的硬體單位，一個 Worker Node 對應到的是一台機器，在 GCP 中即好比 Computer Engine，並由 kubelet、kube-proxy、Container Runtime 組成，主要負責運算資源的控制。</p>
+<h3 id="Master-Node"><a href="#Master-Node" class="headerlink" title="Master Node"></a>Master Node</h3><p>Master Node 是 kubernetes 中的指揮所，提供包括 API Server、Etcd、叢集資源排程、應用部署管理等工作，負責管理其他 Node。</p>
+<h3 id="Connect-to-Kubernetes-Kubectl"><a href="#Connect-to-Kubernetes-Kubectl" class="headerlink" title="Connect to Kubernetes - Kubectl"></a>Connect to Kubernetes - Kubectl</h3><p>Kubectl 是 kubernetes 的 Command Line 工具， kubectl 可以用來操作 Kubernetes 中的 Cluster，接下來就來說明一下如何建立 Pod、Service、Deployment、Ingerss，並透過 kubectl 建立。</p>
+<h2 id="Pod-1"><a href="#Pod-1" class="headerlink" title="Pod"></a>Pod</h2><p>Pod 就如同前一章所說明的對應到每個 Application，而透過編寫下述 .yaml 檔案可以建立 helloPod 這個服務。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line">  <span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line">  <span class="attr">metadata:</span></span><br><span class="line">   <span class="attr">name:</span> <span class="string">helloPod</span></span><br><span class="line">   <span class="attr">labels:</span></span><br><span class="line">     <span class="attr">app:</span> <span class="string">test</span></span><br><span class="line"> <span class="attr">spec:</span></span><br><span class="line">   <span class="attr">containers:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">k8sContainer</span></span><br><span class="line">       <span class="attr">image:</span> <span class="string">helloPod/k8sDemo</span></span><br><span class="line">       <span class="attr">ports:</span></span><br><span class="line">         <span class="bullet">-</span> <span class="attr">containerPort:</span> <span class="number">8787</span></span><br></pre></td></tr></table></figure>
+
+<p>其中的各項文件分別代表:</p>
+<ul>
+<li>apiVersion: <ul>
+<li>版號</li>
+</ul>
+</li>
+<li>kind:<ul>
+<li>屬性 (e.g. Pod, Node, Deployment, Service, Namespace)</li>
+</ul>
+</li>
+<li>metadata:<ul>
+<li>name:<ul>
+<li>name of pod</li>
+</ul>
+</li>
+<li>labels<ul>
+<li>lable of pod</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>spec :: containers:<ul>
+<li>name:<ul>
+<li>name of container</li>
+</ul>
+</li>
+<li>image:<ul>
+<li>image of container from DockerHub</li>
+</ul>
+</li>
+<li>ports:<ul>
+<li>port of container that can be access</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="使用-kubectl-建立-Pod"><a href="#使用-kubectl-建立-Pod" class="headerlink" title="使用 kubectl 建立 Pod"></a>使用 kubectl 建立 Pod</h3><p>使用 apply 指令根據 .yaml 建立 Pod</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f helloPod.yaml</span><br></pre></td></tr></table></figure>
+
+<p>接著可以使用 get 查看運行的 Pod</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods</span><br></pre></td></tr></table></figure>
+
+<p>若要在本地端進行 access 可以透過 port-forward 進行服務連線</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl port-forward helloPod 8787:8787</span><br></pre></td></tr></table></figure>
+
+<p>上述指令代表將 localhost 的 port 8787 mapping 至 helloPod 的 8787 por。</p>
+<h2 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h2><p>了解完 Pod 的建立後，接下來甚麼來講講甚麼是 Service。 由於 Pod 的生命週期是動態的，而為使系統在升級過程中達到無停機服務遷移，因此需要一個服務來讓每一次的存取可以正確連結到正在運行中的 Pod，這裡指的服務就是 Service。  </p>
+<p>撰寫 Service 物件 .yaml file:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line">  <span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line">  <span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">helloService</span></span><br><span class="line">    <span class="attr">labels:</span></span><br><span class="line">     <span class="attr">app:</span> <span class="string">test</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">port:</span> <span class="number">8787</span></span><br><span class="line">    <span class="attr">targetPort:</span> <span class="number">8787</span></span><br><span class="line">    <span class="attr">protocol:</span> <span class="string">TCP</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">demoApp</span></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Deployment"><a href="#Deployment" class="headerlink" title="Deployment"></a>Deployment</h2><p>在討論完 Pod 與 Service 後可以來講講服務的縱向擴展元件 - Deployment，可以將 Deployment 看作將 Pod copy 多份在同一個 cluster 中提供服務，並監控這些 Pod 的運作以達到 <code>自動佈署</code> (重啟) 與 <code>多份備份</code> 的功能。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">helloDeployment</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">hello</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">test</span></span><br><span class="line">    <span class="attr">service:</span> <span class="string">hello</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">3</span></span><br><span class="line">  <span class="attr">revisionHistoryLimit:</span> <span class="number">3</span></span><br><span class="line">  <span class="attr">strategy:</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">RollingUpdate</span></span><br><span class="line">    <span class="attr">rollingUpdate:</span></span><br><span class="line">      <span class="attr">maxSurge:</span> <span class="number">1</span></span><br><span class="line">      <span class="attr">maxUnavailable:</span> <span class="number">0</span></span><br><span class="line">  <span class="attr">minReadySeconds:</span> <span class="number">0</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">demoApp</span></span><br><span class="line">      <span class="attr">service:</span> <span class="string">hello</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">demoApp</span></span><br><span class="line">        <span class="attr">service:</span> <span class="string">hello</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">serviceAccountName:</span> <span class="string">xxx</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">k8sContainer</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">helloPod/k8sDemo</span></span><br><span class="line">        <span class="attr">imagePullPolicy:</span> <span class="string">Always</span></span><br><span class="line">        <span class="attr">ports:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">http</span></span><br><span class="line">          <span class="attr">containerPort:</span> <span class="number">8787</span></span><br><span class="line">        <span class="attr">env:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">VARIABLE1</span></span><br><span class="line">          <span class="attr">value:</span> <span class="string">&quot;test-001&quot;</span></span><br><span class="line">        <span class="attr">resources:</span></span><br><span class="line">          <span class="attr">requests:</span></span><br><span class="line">            <span class="attr">memory:</span> <span class="string">&quot;128Mi&quot;</span></span><br><span class="line">            <span class="attr">cpu:</span> <span class="string">&quot;256m&quot;</span></span><br><span class="line">          <span class="attr">limits:</span></span><br><span class="line">            <span class="attr">memory:</span> <span class="string">&quot;512Mi&quot;</span></span><br><span class="line">            <span class="attr">cpu:</span> <span class="string">&quot;512m&quot;</span></span><br><span class="line">      <span class="attr">imagePullSecrets:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">xxx</span></span><br></pre></td></tr></table></figure>
+
+
+<p>其中的各項元件分別代表(僅註未說明):</p>
+<ul>
+<li>spec<ul>
+<li>replicas<ul>
+<li>表示指定要建立多少個相同的 Pod ，若運行中的 Pod 低於這個數字，服務將會自動啟用 新的 Pod。</li>
+</ul>
+</li>
+<li>strategy</li>
+<li>template<ul>
+<li>指定該 Deployment 所建立的 Pods 統一設定，包含 meatadata &amp; Containers，環境變數與 resources limit 等等。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>接著可以使用 get 查看運行的 Deployment &amp; Pod</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl get deploy</span><br><span class="line">kubectl get pods</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h2><p>Continue …</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://kubernetes.io/">https://kubernetes.io/</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jeremyjordan.me/kubernetes/">https://www.jeremyjordan.me/kubernetes/</a></li>
+<li><a target="_blank" rel="noopener" href="https://ithelp.ithome.com.tw/articles/10192401">https://ithelp.ithome.com.tw/articles/10192401</a></li>
+<li><a target="_blank" rel="noopener" href="https://cwhu.medium.com/kubernetes-implement-ingress-deployment-tutorial-7431c5f96c3e">https://cwhu.medium.com/kubernetes-implement-ingress-deployment-tutorial-7431c5f96c3e</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/01/28/%E9%AB%98%E6%95%88%E8%83%BDpython-002-list-tuple/" rel="prev" title="Python 學習筆記 - 內建序列 (list & tuple)">
+      <i class="fa fa-chevron-left"></i> Python 學習筆記 - 內建序列 (list & tuple)
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Note-Kubernetes"><span class="nav-number">1.</span> <span class="nav-text">[Note] Kubernetes</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#what%E2%80%99s-kubernetes"><span class="nav-number">1.1.</span> <span class="nav-text">what’s kubernetes?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Component-of-Kubernetes"><span class="nav-number">1.2.</span> <span class="nav-text">Component of Kubernetes</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Pod"><span class="nav-number">1.2.1.</span> <span class="nav-text">Pod</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Worker-Node"><span class="nav-number">1.2.2.</span> <span class="nav-text">Worker Node</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Master-Node"><span class="nav-number">1.2.3.</span> <span class="nav-text">Master Node</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Connect-to-Kubernetes-Kubectl"><span class="nav-number">1.2.4.</span> <span class="nav-text">Connect to Kubernetes - Kubectl</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-1"><span class="nav-number">1.3.</span> <span class="nav-text">Pod</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-kubectl-%E5%BB%BA%E7%AB%8B-Pod"><span class="nav-number">1.3.1.</span> <span class="nav-text">使用 kubectl 建立 Pod</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service"><span class="nav-number">1.4.</span> <span class="nav-text">Service</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deployment"><span class="nav-number">1.5.</span> <span class="nav-text">Deployment</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ingress"><span class="nav-number">1.6.</span> <span class="nav-text">Ingress</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">1.7.</span> <span class="nav-text">References</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Sean Chen"
+      src="/images/head.jpg">
+  <p class="site-author-name" itemprop="name">Sean Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/n60512" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;n60512" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:n60512@gmail.com" title="E-Mail → mailto:n60512@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/profile.php?id=100000123574307" title="FB Page → https:&#x2F;&#x2F;www.facebook.com&#x2F;profile.php?id&#x3D;100000123574307" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>FB Page</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Sean Chen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
