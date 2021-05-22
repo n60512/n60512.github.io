@@ -309,4 +309,162 @@
     
   </entry>
   
+  <entry>
+    <title>Attention Is All You Need (part 1)</title>
+    <link href="http://example.com/2020/09/07/transformer-part1/"/>
+    <id>http://example.com/2020/09/07/transformer-part1/</id>
+    <published>2020-09-06T16:00:00.000Z</published>
+    <updated>2021-05-16T09:14:33.832Z</updated>
+    
+    <content type="html"><![CDATA[<p>這一篇 Paper 在碩士生涯中出現的次數也不下10次了吧，畢竟它在 NLP 領域上扮演的角色實在是太重要，整理之前的論文筆記、心得與參考資料，藉著入伍前 8 個小時再來複習一次 🙆🙆 (應該沒有哪個菜兵會幹這種事吧)。</p><h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>本篇作者提出　Transformer， 一種完全基於　self-attention 機制的序列模型架構。</p><p>目前被廣泛運用在閱讀理解、資料摘要等任務中。</p><p>Transformer 與傳統學習語言模型的 RNN 架構 Seq2Seq 模型不同，其透過 Self-Attention 機制計算出輸出的特徵向量表示，<br>相較於 RNN 類模型需要等待上一個狀態的輸出向量進行當前狀態的計算，Transformer 的運算方式透過與序列中所有單位元計算可以有效提升模型運算的效率。</p><h2 id="Query-Key-Value"><a href="#Query-Key-Value" class="headerlink" title="Query / Key / Value"></a>Query / Key / Value</h2><p>在注意力模型中，我們假設輸入模型的序列資料為 ($x_1, x_2, … , x_n$)<br>輸出隱藏狀態向量序列為 ($h_1, h_2, … , h_n$)<br>透過注意力權重(attention weight) 乘以輸入序列資料，接著取加權平均得到情境特徵向量(Context Vector)，最後即可使用 $C_t$ (t 表狀態) 計算考慮注意力權重的輸出句子 ($y_1, y_2, … , y_n$)。</p><span id="more"></span><p>如此我們也可以說是，將每一個輸入序列作為 Query、位址作為 Key，透過計算狀態 Q 與 K 的相似性得到對於元素 Value 的權重係數，接著乘上 V 進行加權求和得到 Context Vector。</p><h2 id="Scaled-Dot-Product-attention"><a href="#Scaled-Dot-Product-attention" class="headerlink" title="Scaled Dot-Product attention"></a>Scaled Dot-Product attention</h2><p><img src="https://i.imgur.com/1tp6pve.png"></p><p>延續上述提到 K, Q, V 的概念， 在Transformer 中使用的 Self-Attention 將其視為同一個輸入，並藉由各自的向量矩陣 $(W_K, W_Q, W_V)$ 投影轉換輸入得到 K, Q, V。</p><p>接著，注意力權重的計算方式則可以表示為以下公式：</p><p>$Attention(Q, K, V) = softmax(QK^T/\sqrt{d_k})V$ (a.)</p><p><img src="https://i.imgur.com/aPyGkpC.jpg"></p><p>其中 $1/\sqrt{d_k}$ 是一個標準化的計算步驟以防止計算結果過大， $d_k$ 則為 K 的向量維度大小。</p><h2 id="Multi-head-attention"><a href="#Multi-head-attention" class="headerlink" title="Multi-head attention"></a>Multi-head attention</h2><p>接著，論文中進一步提出 Multi-head attention 的機制以捕捉在不同向量空間中序列資料所可能包含的訊息。</p><p>實際的操作方法是將 K, Q, V 線性投影到 h 個不同的向量空間，並個別進行 Scaled Dot-Product attention 運算得到 h 個 attention head，最後將 h 個矩陣接合(Concat.) 並藉由 weighting matrix 得到輸出矩陣 $Z$ 。</p><p><img src="https://i.imgur.com/ynSadpc.jpg"></p><h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a></p><p><a href="https://allen108108.github.io/blog/2020/05/13/[%E8%AB%96%E6%96%87]%20Attention%20Is%20All%20You%20Need/">[論文] Attention Is All You Need</a></p><p><a href="https://medium.com/@bgg/seq2seq-pay-attention-to-self-attention-part-2-%E4%B8%AD%E6%96%87%E7%89%88-ef2ddf8597a4">Seq2seq pay Attention to Self Attention: Part 2(中文版)</a></p><p><a href="https://zhuanlan.zhihu.com/p/47282410">Attention机制详解（二）——Self-Attention与Transformer</a></p>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;這一篇 Paper 在碩士生涯中出現的次數也不下10次了吧，畢竟它在 NLP 領域上扮演的角色實在是太重要，整理之前的論文筆記、心得與參考資料，藉著入伍前 8 個小時再來複習一次 🙆🙆 (應該沒有哪個菜兵會幹這種事吧)。&lt;/p&gt;
+&lt;h2 id=&quot;Introduction&quot;&gt;&lt;a href=&quot;#Introduction&quot; class=&quot;headerlink&quot; title=&quot;Introduction&quot;&gt;&lt;/a&gt;Introduction&lt;/h2&gt;&lt;p&gt;本篇作者提出　Transformer， 一種完全基於　self-attention 機制的序列模型架構。&lt;/p&gt;
+&lt;p&gt;目前被廣泛運用在閱讀理解、資料摘要等任務中。&lt;/p&gt;
+&lt;p&gt;Transformer 與傳統學習語言模型的 RNN 架構 Seq2Seq 模型不同，其透過 Self-Attention 機制計算出輸出的特徵向量表示，&lt;br&gt;相較於 RNN 類模型需要等待上一個狀態的輸出向量進行當前狀態的計算，Transformer 的運算方式透過與序列中所有單位元計算可以有效提升模型運算的效率。&lt;/p&gt;
+&lt;h2 id=&quot;Query-Key-Value&quot;&gt;&lt;a href=&quot;#Query-Key-Value&quot; class=&quot;headerlink&quot; title=&quot;Query / Key / Value&quot;&gt;&lt;/a&gt;Query / Key / Value&lt;/h2&gt;&lt;p&gt;在注意力模型中，我們假設輸入模型的序列資料為 ($x_1, x_2, … , x_n$)&lt;br&gt;輸出隱藏狀態向量序列為 ($h_1, h_2, … , h_n$)&lt;br&gt;透過注意力權重(attention weight) 乘以輸入序列資料，接著取加權平均得到情境特徵向量(Context Vector)，最後即可使用 $C_t$ (t 表狀態) 計算考慮注意力權重的輸出句子 ($y_1, y_2, … , y_n$)。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Natural Language Processing" scheme="http://example.com/categories/Natural-Language-Processing/"/>
+    
+    <category term="Note" scheme="http://example.com/categories/Natural-Language-Processing/Note/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>關於當兵 - 入伍前</title>
+    <link href="http://example.com/2020/09/06/about-military/"/>
+    <id>http://example.com/2020/09/06/about-military/</id>
+    <published>2020-09-05T16:00:00.000Z</published>
+    <updated>2021-05-16T08:59:59.562Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="murmur"><a href="#murmur" class="headerlink" title="murmur"></a>murmur</h1><p>當兵的前一個周末，也許是想到入伍後大概好一陣子不能寫code，擔心大腦效能嚴重下降<br>試著把 BERT 中文版的命名實體識別實作完畢 <a href="https://github.com/n60512/BERT-NER-CHINESE">BERT-NER-CHINESE</a>。</p><p>這半個月開啟 <strong>netflix</strong> 會員，並且看完：</p><ul><li>  紙牌屋 第一季</li><li>  紙牌屋 第二季</li><li>  闇 第一季</li><li>  闇 第二季 前五集</li></ul><p>記錄一下一個 netflix 菜雞的心得：</p><h2 id="紙牌屋"><a href="#紙牌屋" class="headerlink" title="紙牌屋"></a>紙牌屋</h2><p>第一季的紙牌屋的男主角 Francis Underwood 實在很對味口，並且也藉由此劇了解一點美國的政治文化。然而劇情在第二季中段就開始有些疲弱，也許是一切劇情發展太過順遂，富豪對手屢屢被壓著打沒有劇情張力，又或許是一再看 Francis 重複一樣的戲碼的不新鮮感導致整體好看程度不級首季棄追。</p><h2 id="闇"><a href="#闇" class="headerlink" title="闇"></a>闇</h2><p>闇則是還不錯的時空穿越劇，但是前期有一點節奏偏慢，若非女友陪著看可能會棄追。但後面慢慢接露線索後就會開始一集一集的接續看。</p><span id="more"></span><h1 id="117t-高雄黃埔陸軍"><a href="#117t-高雄黃埔陸軍" class="headerlink" title="117t 高雄黃埔陸軍"></a>117t 高雄黃埔陸軍</h1><p>後天 20.09.08 是我入伍數饅頭的日子，預計 21.01.03 退伍，其實自己對入伍沒有太多想法，畢竟每個人都是公平的，唯一希望有機會在裡面翻翻書不讓腦袋遲鈍。</p><p>本身住在台中，原本認為很衰的抽到高雄黃埔要跑超遠去當兵，但看ptt版上、網路上、朋友都說高雄黃埔很涼，難道是抽到大獎了嗎 LOL</p>]]></content>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;murmur&quot;&gt;&lt;a href=&quot;#murmur&quot; class=&quot;headerlink&quot; title=&quot;murmur&quot;&gt;&lt;/a&gt;murmur&lt;/h1&gt;&lt;p&gt;當兵的前一個周末，也許是想到入伍後大概好一陣子不能寫code，擔心大腦效能嚴重下降&lt;br&gt;試著把 BERT 中文版的命名實體識別實作完畢 &lt;a href=&quot;https://github.com/n60512/BERT-NER-CHINESE&quot;&gt;BERT-NER-CHINESE&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;這半個月開啟 &lt;strong&gt;netflix&lt;/strong&gt; 會員，並且看完：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;  紙牌屋 第一季&lt;/li&gt;
+&lt;li&gt;  紙牌屋 第二季&lt;/li&gt;
+&lt;li&gt;  闇 第一季&lt;/li&gt;
+&lt;li&gt;  闇 第二季 前五集&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;記錄一下一個 netflix 菜雞的心得：&lt;/p&gt;
+&lt;h2 id=&quot;紙牌屋&quot;&gt;&lt;a href=&quot;#紙牌屋&quot; class=&quot;headerlink&quot; title=&quot;紙牌屋&quot;&gt;&lt;/a&gt;紙牌屋&lt;/h2&gt;&lt;p&gt;第一季的紙牌屋的男主角 Francis Underwood 實在很對味口，並且也藉由此劇了解一點美國的政治文化。然而劇情在第二季中段就開始有些疲弱，也許是一切劇情發展太過順遂，富豪對手屢屢被壓著打沒有劇情張力，又或許是一再看 Francis 重複一樣的戲碼的不新鮮感導致整體好看程度不級首季棄追。&lt;/p&gt;
+&lt;h2 id=&quot;闇&quot;&gt;&lt;a href=&quot;#闇&quot; class=&quot;headerlink&quot; title=&quot;闇&quot;&gt;&lt;/a&gt;闇&lt;/h2&gt;&lt;p&gt;闇則是還不錯的時空穿越劇，但是前期有一點節奏偏慢，若非女友陪著看可能會棄追。但後面慢慢接露線索後就會開始一集一集的接續看。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Life" scheme="http://example.com/categories/Life/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>使用 BERT-QA 建立自動閱讀理解模型</title>
+    <link href="http://example.com/2020/08/27/side-proj-bertqa/"/>
+    <id>http://example.com/2020/08/27/side-proj-bertqa/</id>
+    <published>2020-08-26T16:00:00.000Z</published>
+    <updated>2021-05-16T13:58:13.018Z</updated>
+    
+    <content type="html"><![CDATA[<p>BERT 架構與訓練可以在 <a href="https://arxiv.org/abs/1810.04805">BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding</a> 中有更詳細的說明。<br><a href="https://github.com/n60512/BERT-QA">n60512/BERT-QA</a> 提供閱讀理解模型的模型微調(fine-tune)功能，使用方法如下：</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><p>開始微調訓練:</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sh tarin.sh</span><br></pre></td></tr></table></figure><p>接著修改 interaction.sh 中 load_model_path 的路徑位置:</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sh interaction.sh  </span><br></pre></td></tr></table></figure><h2 id="The-experimental-result-of-F1-measure："><a href="#The-experimental-result-of-F1-measure：" class="headerlink" title="The experimental result of F1-measure："></a>The experimental result of F1-measure：</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Evaluation 100%|███████████████████████████████████| 495/495 \[00:05&lt;00:00, 91.41it/s\]  </span><br><span class="line">Average f1 : 0.5596300989105781</span><br></pre></td></tr></table></figure><h3 id="測試結果"><a href="#測試結果" class="headerlink" title="測試結果"></a><a href="#%E6%B8%AC%E8%A9%A6%E7%B5%90%E6%9E%9C" title="測試結果"></a>測試結果</h3><p><img src="https://i.imgur.com/bxJ0oyV.png" alt="res1"></p><p><img src="https://i.imgur.com/F3mB5jQ.png" alt="res2"></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;BERT 架構與訓練可以在 &lt;a href=&quot;https://arxiv.org/abs/1810.04805&quot;&gt;BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding</summary>
+      
+    
+    
+    
+    <category term="Natural Language Processing" scheme="http://example.com/categories/Natural-Language-Processing/"/>
+    
+    <category term="Project" scheme="http://example.com/categories/Natural-Language-Processing/Project/"/>
+    
+    
+    <category term="Machine Learning" scheme="http://example.com/tags/Machine-Learning/"/>
+    
+    <category term="Deep Learning" scheme="http://example.com/tags/Deep-Learning/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MetaPred：Meta-Learning for Clinical Risk Prediction with Limited Patient Electronic Health Records</title>
+    <link href="http://example.com/2020/07/23/metapred/"/>
+    <id>http://example.com/2020/07/23/metapred/</id>
+    <published>2020-07-22T16:00:00.000Z</published>
+    <updated>2021-05-16T13:58:08.531Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Meta-Learning"><a href="#Meta-Learning" class="headerlink" title="Meta-Learning"></a>Meta-Learning</h1><hr><p><img src="https://i.imgur.com/6ITXlOm.png" alt="MetaPred"></p><p>目的從多種 source domain (相似種類任務)<br>學習如何 ‘調整參數’ 的策略<br>最終運用在 target domain 中</p><span id="more"></span><p><img src="https://i.imgur.com/z53IyMx.png" alt="Training algorithm"></p><h2 id="Inner-Loop"><a href="#Inner-Loop" class="headerlink" title="Inner-Loop"></a>Inner-Loop</h2><p>Inner-Loop 部份顯示<br>使用多組 source domains 訓練模型 $f$ 參數 $\theta$ (共參)</p><p>分別學習模型參數對各自任務優化參數，並可確保各domain訓練數量相當<br>Domains 同時訓練可能模糊學習目標(平均掉損失函數)</p><h2 id="Outer-Loop"><a href="#Outer-Loop" class="headerlink" title="Outer-Loop"></a>Outer-Loop</h2><p>第11行：與遷移學習所不同之處為，meta-training 藉由同時考慮 target domain 和 source domains 的損失函數優化參數。<br>$uΣ^{K-1}_{i} L_s$  </p><h2 id="相較於-multi-task-learing"><a href="#相較於-multi-task-learing" class="headerlink" title="相較於 multi-task learing"></a>相較於 multi-task learing</h2><p>根據不同種類任務，對目標損失優化參數</p><h2 id="相較於-遷移學習"><a href="#相較於-遷移學習" class="headerlink" title="相較於 遷移學習"></a>相較於 遷移學習</h2><p>遷移學習則是將訓練完成的模型在target domain中進行微調以最佳化。</p><h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul><li>MetaPred: Meta-Learning for Clinical Risk Prediction with Limited Patient Electronic Health Records, KDD’19</li></ul>]]></content>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;Meta-Learning&quot;&gt;&lt;a href=&quot;#Meta-Learning&quot; class=&quot;headerlink&quot; title=&quot;Meta-Learning&quot;&gt;&lt;/a&gt;Meta-Learning&lt;/h1&gt;&lt;hr&gt;
+&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/6ITXlOm.png&quot; alt=&quot;MetaPred&quot;&gt;&lt;/p&gt;
+&lt;p&gt;目的從多種 source domain (相似種類任務)&lt;br&gt;學習如何 ‘調整參數’ 的策略&lt;br&gt;最終運用在 target domain 中&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Natural Language Processing" scheme="http://example.com/categories/Natural-Language-Processing/"/>
+    
+    <category term="Note" scheme="http://example.com/categories/Natural-Language-Processing/Note/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Hierarchical Attention based Neural Network for Explainable Recommendation</title>
+    <link href="http://example.com/2019/08/26/HANN/"/>
+    <id>http://example.com/2019/08/26/HANN/</id>
+    <published>2019-08-25T16:00:00.000Z</published>
+    <updated>2021-05-16T13:58:08.399Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Overview-of-HANN-model"><a href="#Overview-of-HANN-model" class="headerlink" title="Overview of HANN model"></a>Overview of HANN model</h1><p><img src="https://i.imgur.com/8fGpeaK.png" alt="HANN"></p><h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>Propose two kinds of review attentions, namely, intra-review attention and inter-review attention.</p><ul><li>The first one can reflect the <strong>word difference</strong> in a review</li><li>the latter one can explore the importance of <strong>different reviews</strong> towards a user/item.</li></ul><p>Present a framework of hierarchical neural network named HANN to integrate the two kinds of review attention. The well-designed hierarchical attention mechanism helps the model capture <strong>user profiles</strong> and <strong>item profiles</strong>, making them more explainable and reasonable.</p><span id="more"></span><h2 id="intra-review-word-level"><a href="#intra-review-word-level" class="headerlink" title="intra-review (word-level)"></a>intra-review (word-level)</h2><h3 id="element-wise-product-of-user-item-pair"><a href="#element-wise-product-of-user-item-pair" class="headerlink" title="element-wise product of user-item pair"></a>element-wise product of user-item pair</h3><p>$v_{u,i}$</p><h3 id="compute-weighting-score-for-each-word-in-reviews"><a href="#compute-weighting-score-for-each-word-in-reviews" class="headerlink" title="compute weighting score for each word in reviews"></a>compute weighting score for each word in reviews</h3><p>$a^{*}<em>{j} = W^{T}</em>{a}ReLU(W_h h_j+W_u v_{u,i}+b_1)+b_2$</p><h3 id="compute-attention-score"><a href="#compute-attention-score" class="headerlink" title="compute attention score"></a>compute attention score</h3><p>$a_{j} = exp(a^{<em>}_{j})/Σexp(a^{</em>}_{j})$</p><h3 id="and-then-reflexts-the-importance-of-each-word-for-user-item-pair"><a href="#and-then-reflexts-the-importance-of-each-word-for-user-item-pair" class="headerlink" title="and then , reflexts the importance of each word for user-item pair"></a>and then , reflexts the importance of each word for user-item pair</h3><p>$h=Σ_{j=1,2,…,n} a_j h_j$</p><h2 id="inter-review-review-level"><a href="#inter-review-review-level" class="headerlink" title="inter-review (review-level)"></a>inter-review (review-level)</h2><h3 id="element-wise-product-of-user-item-pair-1"><a href="#element-wise-product-of-user-item-pair-1" class="headerlink" title="element-wise product of user-item pair"></a>element-wise product of user-item pair</h3><p>$v_{u,i}$</p><h3 id="compute-weighting-score-for-each-reviews"><a href="#compute-weighting-score-for-each-reviews" class="headerlink" title="compute weighting score for each reviews"></a>compute weighting score for <strong>each reviews</strong></h3><p>$\beta^{*}<em>{j} = W^{T}</em>{b}ReLU(W_{s}(s_j \otimes p_j) h_j+W_v v_{u,i}+b_3)+b_4$</p><h3 id="compute-attention-score-1"><a href="#compute-attention-score-1" class="headerlink" title="compute attention score"></a>compute attention score</h3><p>$a_j = exp(\beta^{<em>}_{j})/Σexp(\beta^{</em>}_{j})$</p><h3 id="and-then-reflexts-the-importance-of-each-reviews-for-user-item-pair"><a href="#and-then-reflexts-the-importance-of-each-reviews-for-user-item-pair" class="headerlink" title="and then , reflexts the importance of each reviews for user-item pair"></a>and then , reflexts the importance of <strong>each reviews</strong> for user-item pair</h3><p>$s=Σ_{j=1,2,…,n} \beta_j (s_j \otimes p_j)$</p><h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><blockquote><p><a href="https://dl.acm.org/citation.cfm?id=3326592">Hierarchical Attention based Neural Network for Explainable Recommendation</a> [name=D Cong] [time=2019]</p></blockquote>]]></content>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;Overview-of-HANN-model&quot;&gt;&lt;a href=&quot;#Overview-of-HANN-model&quot; class=&quot;headerlink&quot; title=&quot;Overview of HANN model&quot;&gt;&lt;/a&gt;Overview of HANN model&lt;/h1&gt;&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/8fGpeaK.png&quot; alt=&quot;HANN&quot;&gt;&lt;/p&gt;
+&lt;h1 id=&quot;Summary&quot;&gt;&lt;a href=&quot;#Summary&quot; class=&quot;headerlink&quot; title=&quot;Summary&quot;&gt;&lt;/a&gt;Summary&lt;/h1&gt;&lt;p&gt;Propose two kinds of review attentions, namely, intra-review attention and inter-review attention.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The first one can reflect the &lt;strong&gt;word difference&lt;/strong&gt; in a review&lt;/li&gt;
+&lt;li&gt;the latter one can explore the importance of &lt;strong&gt;different reviews&lt;/strong&gt; towards a user/item.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Present a framework of hierarchical neural network named HANN to integrate the two kinds of review attention. The well-designed hierarchical attention mechanism helps the model capture &lt;strong&gt;user profiles&lt;/strong&gt; and &lt;strong&gt;item profiles&lt;/strong&gt;, making them more explainable and reasonable.&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Recommendation System" scheme="http://example.com/categories/Recommendation-System/"/>
+    
+    <category term="Note" scheme="http://example.com/categories/Recommendation-System/Note/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Neural Attentional Rating Regression with Review-level Explanations</title>
+    <link href="http://example.com/2019/07/30/NARRE/"/>
+    <id>http://example.com/2019/07/30/NARRE/</id>
+    <published>2019-07-29T16:00:00.000Z</published>
+    <updated>2021-05-16T13:58:08.578Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Overview-of-NARR-model"><a href="#Overview-of-NARR-model" class="headerlink" title="Overview of NARR model"></a>Overview of NARR model</h1><p><img src="https://i.imgur.com/cEJ6saP.jpg" alt="NARR"></p><ul><li><strong>CNN</strong> Text Processor + <strong>Atttion</strong> base review pooling</li><li>Predicts user ratings to the item.</li><li>Seleting userful reviews automatically (With <strong>attention</strong> network).</li></ul><span id="more"></span><h1 id="References"><a href="#References" class="headerlink" title="References:"></a>References:</h1><blockquote><p><a href="http://www.thuir.cn/group/~YQLiu/publications/WWW2018_CC.pdf">Neural Attentional Rating Regression with Review-level Explanations</a> [50] [name=C Chen] [time=2018]<code>DeepCoNN</code></p></blockquote>]]></content>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;Overview-of-NARR-model&quot;&gt;&lt;a href=&quot;#Overview-of-NARR-model&quot; class=&quot;headerlink&quot; title=&quot;Overview of NARR model&quot;&gt;&lt;/a&gt;Overview of NARR model&lt;/h1&gt;&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/cEJ6saP.jpg&quot; alt=&quot;NARR&quot;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;CNN&lt;/strong&gt; Text Processor + &lt;strong&gt;Atttion&lt;/strong&gt; base review pooling&lt;/li&gt;
+&lt;li&gt;Predicts user ratings to the item.&lt;/li&gt;
+&lt;li&gt;Seleting userful reviews automatically (With &lt;strong&gt;attention&lt;/strong&gt; network).&lt;/li&gt;
+&lt;/ul&gt;</summary>
+    
+    
+    
+    <category term="Recommendation System" scheme="http://example.com/categories/Recommendation-System/"/>
+    
+    <category term="Note" scheme="http://example.com/categories/Recommendation-System/Note/"/>
+    
+    
+  </entry>
+  
 </feed>
