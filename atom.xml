@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2021-05-18T07:07:33.992Z</updated>
+  <updated>2021-05-23T09:24:26.182Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,26 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>gcp-dataproc</title>
+    <link href="http://example.com/2021/05/22/dataproc-note-001/"/>
+    <id>http://example.com/2021/05/22/dataproc-note-001/</id>
+    <published>2021-05-22T13:37:31.000Z</published>
+    <updated>2021-05-23T09:24:26.182Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="What’s-Dataproc"><a href="#What’s-Dataproc" class="headerlink" title="What’s Dataproc"></a>What’s Dataproc</h1><p>dataproc 是 google 推出的 Spark, hadoop 托管服務，<br>可以快速的佈建 cluster 環境，並降低管理困難與使用成本，<br>透過 dataproc 用戶可以專注在數據處理與分析上。 </p><h1 id="Create-dataproc-clusters"><a href="#Create-dataproc-clusters" class="headerlink" title="Create dataproc clusters"></a>Create dataproc clusters</h1><p>建立 clusters 的方式除了透過 GCP 網頁介面也可以透過 gcloud cmd 佈建</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gcloud dataproc clusters create \</span><br><span class="line">    dataproc-demo  \</span><br><span class="line">    --region us-west1</span><br></pre></td></tr></table></figure><p>更詳細的指令使用可以參照 <a href="https://cloud.google.com/sdk/gcloud/reference/dataproc/clusters/create">dataproc creat</a></p><h2 id="SSH-into-cluster"><a href="#SSH-into-cluster" class="headerlink" title="SSH into cluster"></a>SSH into cluster</h2><p>如同 SSH 至 instance 的方法，可以以 <code>gcloud compute ssh</code><br>連線。</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">gcloud compute ssh \</span><br><span class="line">    --zone &quot;us-west1&quot; \</span><br><span class="line">    &quot;dataproc-demo&quot; \</span><br><span class="line">    --project &quot;sean-demo-project&quot;</span><br></pre></td></tr></table></figure><h2 id="Web-UI"><a href="#Web-UI" class="headerlink" title="Web UI"></a>Web UI</h2><p>有時為方邊開發可以透過 <code>--enable-component-gateway</code> 啟用 web interface，<br>提供 jupyter lab/ MapReduce Job History /YARN Application Timeline 等等功能。<br><a href="https://cloud.google.com/dataproc/docs/concepts/accessing/dataproc-gateways?authuser=1&_ga=2.57344362.-1141058148.1619086341#gcloud-command">more</a></p><h2 id="Submit-a-job"><a href="#Submit-a-job" class="headerlink" title="Submit a job"></a>Submit a job</h2><p>以下是提交 pyspark job 的範例，<br>簡單的示範執行 gcs 中 dataproc-examples bucket 的 ./python/hello-world.py</p><p>首先 <code>cp</code> file <code>hello-world.py</code> to bucket</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gsutil cp ./hello-world.py gs://dataproc-examples/python/hello-world.py</span><br></pre></td></tr></table></figure><p>then, submit a pyspark job</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">gcloud dataproc <span class="built_in">jobs</span> submit pyspark \</span><br><span class="line">    --region us-west1 \</span><br><span class="line">    --cluster dataproc-demo  \</span><br><span class="line">    gs://dataproc-examples/python/hello-world.py \</span><br></pre></td></tr></table></figure><h1 id="workflow"><a href="#workflow" class="headerlink" title="workflow"></a>workflow</h1>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;What’s-Dataproc&quot;&gt;&lt;a href=&quot;#What’s-Dataproc&quot; class=&quot;headerlink&quot; title=&quot;What’s Dataproc&quot;&gt;&lt;/a&gt;What’s Dataproc&lt;/h1&gt;&lt;p&gt;dataproc 是 google </summary>
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>[Note] Kubernetes</title>
